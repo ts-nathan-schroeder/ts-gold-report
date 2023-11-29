@@ -1,25 +1,23 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { Filters } from './Filters';
+import { AuthType, init } from '@thoughtspot/visual-embed-sdk';
+import { Search } from './Search';
+
+const tsURL = "https://bits.albertsons.com/"
+const worksheetID = "5038aaef-031a-4c4e-a442-84b5ade2a218"
 
 function App() {
+  init({
+    thoughtSpotHost:tsURL,
+    authType:AuthType.None
+  })
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <>
+      <Filters tsURL={tsURL}></Filters>
+      <Search worksheetID={worksheetID}></Search>
+      </>
   );
 }
 
