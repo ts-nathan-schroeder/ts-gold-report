@@ -1,26 +1,25 @@
 import { SearchEmbed } from "@thoughtspot/visual-embed-sdk/lib/src/react"
 import { useState } from "react"
+import { BaseFields } from "./DataDefinitions";
 
 interface SearchProps {
     worksheetID: string
 }
 export const Search = ({worksheetID}:SearchProps) => {
     const [searchString, setSearchString] = useState('');
-    const [selectedFields, setSelectedFields] = useState([]);
     window.addEventListener('loadReport', function(e:any){
         setSearchString(e.detail.data.searchString);
-        setSelectedFields(e.detail.data.selectedFields);
     })
 
-    let search = "";
-    for (var field of selectedFields){
-        search+="["+field+"] "
+    let searchBase = "[Week ID].202327";
+    for (var field of BaseFields){
+        searchBase+= " ["+field+"]"
     }
     return (
         <div style={{height:'calc(100vh - 530px)'}}>
         <SearchEmbed
         searchOptions={{
-            searchTokenString: searchString ? searchString + search : search,
+            searchTokenString: searchString ? searchBase + searchString : '',
             executeSearch: true
         }}
         customizations={{
@@ -47,7 +46,7 @@ export const Search = ({worksheetID}:SearchProps) => {
             }
         }}
         //runtimeFilters={runtimeFilters}
-
+        forceTable={true}
         dataSource={worksheetID}
         frameParams={{height:'calc(100vh - 530px)',width:'100%'}}></SearchEmbed>
         </div>

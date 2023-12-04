@@ -2,13 +2,14 @@ import { useEffect, useState } from "react"
 interface DropdownFilterProps {
     tsURL: string,
     field: string,
+    fieldLabel: string,
     value: any[],
     runtimeFilters: {},
     setFilter: (value: any)=>void
     multiple: boolean,
     height:string
 }
-export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,runtimeFilters,setFilter,multiple,height}: DropdownFilterProps) => {
+export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,fieldLabel,runtimeFilters,setFilter,multiple,height}: DropdownFilterProps) => {
     const [options, setOptions] = useState<any[]>([])
     useEffect(()=>{
         var url = tsURL+"api/rest/2.0/searchdata"
@@ -42,11 +43,20 @@ export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,runti
             console.log(e.target.selectedOptions);
             if (multiple){
                 let filterVals = Array.from(e.target.selectedOptions).map((option) => {return option.value})
-                setFilter(filterVals)
+                if (filterVals.includes("ALL")){
+                    setFilter([])
+                }else{
+                    setFilter(filterVals)
+                }
             }else{
-                setFilter([e.target.value])
+                if (e.target.value == 'ALL'){
+                    setFilter([])
+                }else{
+                    setFilter([e.target.value])
+                }
             }
             }} multiple={multiple}>
+            <option selected={true} value={"ALL"}>ALL {fieldLabel}</option>
             {options.map((option)=>{
                 return <option value={option}>{option}</option>
             })}
