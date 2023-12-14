@@ -1,5 +1,5 @@
 import { SearchEmbed } from "@thoughtspot/visual-embed-sdk/lib/src/react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { BaseFields } from "./DataDefinitions";
 
 interface SearchProps {
@@ -7,8 +7,14 @@ interface SearchProps {
 }
 export const Search = ({worksheetID}:SearchProps) => {
     const [searchString, setSearchString] = useState('');
+    let ref = useRef<HTMLDivElement>(null);
+    let loadingRef = useRef<HTMLDivElement>(null);
     window.addEventListener('loadReport', function(e:any){
         setSearchString(e.detail.data.searchString);
+        if (ref && ref.current && loadingRef && loadingRef.current){
+            ref.current.style.display="none"
+            loadingRef.current.style.display="flex"
+        }
     })
 
     let searchBase = "[Week ID].202327";
@@ -16,7 +22,8 @@ export const Search = ({worksheetID}:SearchProps) => {
         searchBase+= " ["+field+"]"
     }
     return (
-        <div style={{height:'calc(100vh - 530px)'}}>
+        <>
+        <div ref={ref} style={{height:'calc(100vh - 580px)',display:'none',width:'100%'}}>
         <SearchEmbed
         searchOptions={{
             searchTokenString: searchString ? searchBase + searchString : '',
@@ -48,7 +55,17 @@ export const Search = ({worksheetID}:SearchProps) => {
         //runtimeFilters={runtimeFilters}
         forceTable={true}
         dataSource={worksheetID}
-        frameParams={{height:'calc(100vh - 530px)',width:'100%'}}></SearchEmbed>
+        onData={() => {
+            if (ref && ref.current && loadingRef && loadingRef.current){
+                ref.current.style.display="flex"
+                loadingRef.current.style.display="none"
+            }
+        }}
+        frameParams={{height:'600px',width:'100%'}}></SearchEmbed>
         </div>
+        <div ref={loadingRef} className="w-full flex h-full align-center justify-center items-center bg-slate-600">
+            LOADING ...
+        </div>
+        </>
     )
 }

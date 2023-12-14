@@ -12,13 +12,16 @@ export enum FieldLabel {
     GROUP = 'GROUPS',
     DIVISION = 'DIVISIONS',
     DISTRICT = 'DISTRICTS',
-    UPC = 'UPC'
+    UPC = 'UPCS'
 }
 export const BaseFields: string[] = [
-    'Size',
-    'Pack Size',
-    'Manufacture Type Code',
     'Sales',
     'Sales PY',
-    'Units'
+    'Sales Chg',
+    'Units',
+    'Units PY',
+    'Units Chg',
+    'AGP',
+    'AGP PY',
+    'AGP Chg'
 ]
