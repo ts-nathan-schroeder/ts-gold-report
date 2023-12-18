@@ -9,6 +9,7 @@ body {
 #root, body{
   width:100vw;
   height:100vh;
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity));
 }
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

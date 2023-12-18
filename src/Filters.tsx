@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { DropdownFilter } from "./DropdownFilter"
 import {
     RuntimeFilterOp,
@@ -6,11 +6,14 @@ import {
     useEmbedRef
   } from "@thoughtspot/visual-embed-sdk/lib/src/react";
   import { HiBan, HiMinusCircle, HiPlay, HiPlusCircle } from "react-icons/hi";
-  import { HiMiniPlay } from "react-icons/hi2";
+  import { HiFunnel, HiMiniPlay } from "react-icons/hi2";
 
-import {FieldName, FieldLabel} from "./DataDefinitions"
+  import {DateRangePicker} from "react-date-range"
+
+
+import {FieldName, FieldLabel, GroupFields, CategoryFields} from "./DataDefinitions"
 interface FilterProps{
-    tsURL: string
+    tsURL: string,
 }
 
 export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
@@ -43,7 +46,20 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
     const [sameStore, setSameStore] = useState(false); 
     const [regStore, setRegStore] = useState(false); 
 
+    const [filtersVisible, setFiltersVisible] = useState(true);
+    const [dateRange, setDateRange] = useState<any[]>()
 
+    const filterRef = useRef<HTMLDivElement>(null);
+
+    function toggleExpandFilters(){
+        if (filterRef && filterRef.current){
+          if (filterRef.current.style.display == "flex"){
+            filterRef.current.style.display = "none"
+          }else{
+            filterRef.current.style.display = "flex"
+          }
+        }
+      }
     function toggleField(field: string){
         let selectedFieldsCopy = selectedFields;
         if (selectedFieldsCopy.includes(field)){
@@ -64,17 +80,28 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         if (storeRollup) selectedFieldsCopy.push(FieldName.STORE)
         if (districtRollup) selectedFieldsCopy.push(FieldName.DISTRICT)
         if (divisionRollup) selectedFieldsCopy.push(FieldName.DIVISION)
+
         for (var field of selectedFieldsCopy){
             searchString+="["+field+"] "
         }
         //Add filters
         if ((category.length > 0 || category[0]=='ALL') && !categoryRollup && !groupRollup)  {
+            if (!categoryRollup){
+                for (var categoryField of CategoryFields){
+                    searchString += " ["+categoryField+"]"
+                }      
+            }
             if (categoryExclude) searchString+= " ["+FieldName.CATEGORY+"] !="
             for (var value of category){
                 searchString+=" ["+FieldName.CATEGORY +"]."+"'"+value+"'"
             }
         }
         if ((group.length > 0 || group[0]=='ALL') && !groupRollup)  {
+            if (!groupRollup){
+                for (var groupField of GroupFields){
+                    searchString += " ["+groupField+"]"
+                }      
+            }
             if (groupExclude) searchString+= " ["+FieldName.GROUP+ "] !="
             for (var value of group){
                 searchString+=" ["+FieldName.GROUP+"]."+"'"+value+"'"
@@ -104,6 +131,17 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                 searchString+=" ["+FieldName.DIVISION+"]."+"'"+value+"'"
             }
         }
+        if (sameStore){
+            searchString+= "[Same Store].'true'"
+        }
+        if (regStore){
+            searchString+="[Conventional Store Flag].'true'"
+        }
+
+        // if (groupRollup){
+        //    for (var groupField of GroupFields){}
+        //    searchString += '['+groupField+']'
+        // }
         // searchString+=" [Week ID]."+"'"+timeFrame+"'"
 
         
@@ -115,7 +153,10 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
 
 
     return (
-        <div className="flex flex-row w-full bg-slate-600 p-4 space-x-4" style={{height:'580px'}}>
+        <div className="flex flex-col w-full">
+        <ExpandFilterButton toggleExpandFilters={toggleExpandFilters}></ExpandFilterButton>
+
+        <div ref={filterRef} className="flex flex-row w-full bg-slate-600 p-4 space-x-4" style={{height:'580px'}}>
             <div className="flex flex-col w-1/3 h-full space-y-4">
                 <div className="flex flex-col">
                     <div className="text-white text-2xl font-bold">
@@ -251,7 +292,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             </div>
                             {group.length>0 && group[0]!='ALL' ? 
                             <DropdownFilter key={group[0]} tsURL={tsURL} runtimeFilters={{
-                                col1:"Group Description",
+                                col1:FieldName.GROUP,
                                 op1:groupExclude? "NE" : "IN",
                                 val1:group,
                             }} value={category} field={FieldName.CATEGORY} fieldLabel={FieldLabel.CATEGORY} setFilter={setCategory} multiple={true} height={"h-52"}></DropdownFilter>
@@ -277,10 +318,10 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                 </div>
                                 {group.length>0 && group[0]!='ALL'&& category.length>0 && category[0]!='ALL'  ?
                                 <DropdownFilter key={group[0]+category[0]} tsURL={tsURL} runtimeFilters={{
-                                    col1:"Group Description",
+                                    col1:FieldName.GROUP,
                                     op1:groupExclude ? "NE" : "IN",
                                     val1:group,
-                                    col2:"Category Description",
+                                    col2:FieldName.CATEGORY,
                                     op2:categoryExclude ? "NE" : "IN" ,
                                     val2:category
                                 }} value={upc} field={FieldName.UPC} fieldLabel={FieldLabel.UPC} setFilter={setUpc} multiple={true} height={"h-96"}></DropdownFilter>
@@ -291,19 +332,19 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                 }
                             </div>
                         </div>
-                        <div className="flex flex-col h-full w-3/12 text-lg ml-4 justify-center">
-                            <div className="font-bold">Additional Fields</div>
-                            <div className="mt-2 mb-2"> {/* Adjusted margins for compact spacing */}
+                        <div className="flex flex-col h-full w-3/12 text-sm ml-4 justify-center">
+                            <div className="font-bold text-lg">Additional Fields</div>
+                            <div className="mt-2 mb-2 text-sm"> {/* Adjusted margins for compact spacing */}
                                 <label className="block">
-                                    <input type="radio" name="obNbSelection" value="OB & NB" checked={obNbSelection === 'OB & NB'} onChange={() => setObNbSelection('OB & NB')} />
+                                    <input className="mr-2" type="radio" name="obNbSelection" value="OB & NB" checked={obNbSelection === 'OB & NB'} onChange={() => setObNbSelection('OB & NB')} />
                                     OB & NB
                                 </label>
                                 <label className="block">
-                                    <input type="radio" name="obNbSelection" value="NB Only" checked={obNbSelection === 'NB Only'} onChange={() => setObNbSelection('NB Only')} />
+                                    <input className="mr-2" type="radio" name="obNbSelection" value="NB Only" checked={obNbSelection === 'NB Only'} onChange={() => setObNbSelection('NB Only')} />
                                     NB Only
                                 </label>
                                 <label className="block">
-                                    <input type="radio" name="obNbSelection" value="OB Only" checked={obNbSelection === 'OB Only'} onChange={() => setObNbSelection('OB Only')} />
+                                    <input className="mr-2" type="radio" name="obNbSelection" value="OB Only" checked={obNbSelection === 'OB Only'} onChange={() => setObNbSelection('OB Only')} />
                                     OB Only
                                 </label>
                             </div>
@@ -319,23 +360,23 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             <div><input className="mr-2" onChange={()=>toggleField("Quarter ID")} type="checkbox"></input>Quarter ID</div>
                             <div><input className="mr-2" onChange={()=>toggleField("CIG")} type="checkbox"></input>CIG</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Parent Vendor")} type="checkbox"></input>Parent Vendor</div>
-                            <div><input className="mr-2" onChange={()=>setRegStore(!regStore)} type="checkbox"></input>Same Store</div>
-                            <div><input className="mr-2" onChange={()=>setSameStore(!sameStore)} type="checkbox"></input>Reg Stores Only</div>
+                            <div><input className="mr-2" onChange={()=>setSameStore(!sameStore)} type="checkbox"></input>Same Store</div>
+                            <div><input className="mr-2" onChange={()=>setRegStore(!regStore)} type="checkbox"></input>Reg Stores Only</div>
                         </div>
                     </div>
                     <div onClick={onReportLoad}  className="flex bg-slate-600 hover:bg-slate-500 align-center items-center p-2 text-white font-bold rounded-lg  hover:cursor-pointer">
-                            <div className="w-1/2">
-                            Load Report
-                            </div>
-                            <div className="flex w-1/2 justify-end">
-                            <div className="flex bg-yellow-400 m-1 w-16 rounded-md items-center justify-center"><HiMiniPlay></HiMiniPlay>GO!</div>
-                            </div>
+                        <span>Load Report</span>
+                        <div className="ml-auto flex items-center bg-yellow-400 hover:bg-yellow-300 rounded-lg px-4 py-1">
+                            <HiMiniPlay className="mr-2" /> {/* Icon next to "GO" */}
+                            GO!
+                        </div>
                     </div>
                     </div>
 
                 </div>
 
             </div>
+        </div>
         </div>
 
     )
@@ -355,6 +396,26 @@ const IncludeExcludeButton: React.FC<IncludeExcludeButtonProps> = ({value, setVa
             <div className="text-slate-400 hover:text-slate-500">
             <HiPlusCircle></HiPlusCircle>
             </div>}
+        </div>
+    )
+}
+interface ExpandFilterProps {
+    toggleExpandFilters: () => void
+}
+const ExpandFilterButton: React.FC<ExpandFilterProps> = ({toggleExpandFilters}: ExpandFilterProps) => {
+    const [filtersVisible, setFiltersVisible] = useState(true);
+    function expandFilters(){
+        setFiltersVisible(!filtersVisible)
+        toggleExpandFilters()
+    }
+    return (
+        <div className="flex h-16 bg-slate-200 flex-row m-4 rounded-md">
+            <div className="flex w-1/2 items-center justify-start ml-4">GOLD REPORT</div>
+            <div onClick={expandFilters} className="mr-4 flex w-1/2 items-center justify-end font-bold hover:cursor-pointer text-2xl">
+                {
+                filtersVisible ?<><div className="text-sm mr-2">EXPAND</div> <HiFunnel></HiFunnel></>: <><div className="text-sm mr-2">COLLAPSE</div><HiFunnel></HiFunnel></>
+                }</div>
+
         </div>
     )
 }
