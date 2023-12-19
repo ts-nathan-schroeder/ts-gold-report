@@ -11,7 +11,7 @@ import {
   import {DateRangePicker} from "react-date-range"
 
 
-import {FieldName, FieldLabel, GroupFields, CategoryFields} from "./DataDefinitions"
+import {FieldName, FieldLabel, GroupFields, CategoryFields, UPCFields} from "./DataDefinitions"
 interface FilterProps{
     tsURL: string,
 }
@@ -74,13 +74,19 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         let searchString = "";
         //Add fields
         let selectedFieldsCopy: string[] = selectedFields;
-        if (groupRollup) selectedFieldsCopy.push(FieldName.GROUP)
-        if (categoryRollup) selectedFieldsCopy.push(FieldName.CATEGORY)
-        if (upcRollup) selectedFieldsCopy.push(FieldName.UPC)
-        if (storeRollup) selectedFieldsCopy.push(FieldName.STORE)
-        if (districtRollup) selectedFieldsCopy.push(FieldName.DISTRICT)
-        if (divisionRollup) selectedFieldsCopy.push(FieldName.DIVISION)
-
+        // if (groupRollup) selectedFieldsCopy.push(FieldName.GROUP)
+        // if (categoryRollup) selectedFieldsCopy.push(FieldName.CATEGORY)
+        // if (upcRollup) selectedFieldsCopy.push(FieldName.UPC)
+        // if (storeRollup) selectedFieldsCopy.push(FieldName.STORE)
+        // if (districtRollup) selectedFieldsCopy.push(FieldName.DISTRICT)
+        // if (divisionRollup) selectedFieldsCopy.push(FieldName.DIVISION)
+        if (obNbSelection != "OB & NB"){
+            if (obNbSelection == "OB"){
+                searchString += "[Manufacture Type Code].'H'"
+            }else{
+                searchString += "[Manufacture Type Code].'N'" 
+            }
+        }
         for (var field of selectedFieldsCopy){
             searchString+="["+field+"] "
         }
@@ -108,6 +114,11 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
             }
         }
         if ((upc.length > 0 || upc[0]=='ALL') && !upcRollup && !groupRollup && !categoryRollup)  {
+            if (!upcRollup){
+                for (var upcField of UPCFields){
+                    searchString += " ["+upcField+"]"
+                }      
+            }
             if (upcExclude) searchString+= " ["+FieldName.UPC+"] !="
             for (var value of upc){
                 searchString+=" ["+FieldName.UPC+"]."+"'"+value+"'"
@@ -144,7 +155,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         // }
         // searchString+=" [Week ID]."+"'"+timeFrame+"'"
 
-        
+        console.log()
         const event = new CustomEvent('loadReport', {detail: {data: {
             searchString: searchString}
         }});
@@ -227,7 +238,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         col1:"Division Name",
                         op1:divisionExclude? "NE" : "IN",
                         val1:division
-                    }} value={district} field={FieldName.DISTRICT} fieldLabel={FieldLabel.DISTRICT} setFilter={setDistrict} multiple={false}  height={"h-8"}></DropdownFilter>
+                    }} value={district} field={FieldName.DISTRICT} fieldLabel={FieldLabel.DISTRICT} setFilter={setDistrict} multiple={true}  height={"h-26"}></DropdownFilter>
                     :
                     <div className="h-8 w-full bg-white flex items-center justify-center">
                     {districtRollup ? 'Rollup' : 'Not Included'}
@@ -340,11 +351,11 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     OB & NB
                                 </label>
                                 <label className="block">
-                                    <input className="mr-2" type="radio" name="obNbSelection" value="NB Only" checked={obNbSelection === 'NB Only'} onChange={() => setObNbSelection('NB Only')} />
+                                    <input className="mr-2" type="radio" name="obNbSelection" value="NB" checked={obNbSelection === 'NB Only'} onChange={() => setObNbSelection('NB Only')} />
                                     NB Only
                                 </label>
                                 <label className="block">
-                                    <input className="mr-2" type="radio" name="obNbSelection" value="OB Only" checked={obNbSelection === 'OB Only'} onChange={() => setObNbSelection('OB Only')} />
+                                    <input className="mr-2" type="radio" name="obNbSelection" value="OB" checked={obNbSelection === 'OB Only'} onChange={() => setObNbSelection('OB Only')} />
                                     OB Only
                                 </label>
                             </div>
