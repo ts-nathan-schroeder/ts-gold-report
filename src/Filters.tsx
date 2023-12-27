@@ -82,9 +82,9 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         // if (divisionRollup) selectedFieldsCopy.push(FieldName.DIVISION)
         if (obNbSelection != "OB & NB"){
             if (obNbSelection == "OB"){
-                searchString += "[Manufacture Type Code].'H'"
+                searchString += " [Manufacture Type Code].'H'"
             }else{
-                searchString += "[Manufacture Type Code].'N'" 
+                searchString += " [Manufacture Type Code].'N'" 
             }
         }
         for (var field of selectedFieldsCopy){
@@ -143,10 +143,10 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
             }
         }
         if (sameStore){
-            searchString+= "[Same Store].'true'"
+            searchString+= " [Same Store].'true'"
         }
         if (regStore){
-            searchString+="[Conventional Store Flag].'true'"
+            searchString+=" [Conventional Store Flag].'true'"
         }
 
         // if (groupRollup){
@@ -167,7 +167,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         <div className="flex flex-col w-full">
         <ExpandFilterButton toggleExpandFilters={toggleExpandFilters}></ExpandFilterButton>
 
-        <div ref={filterRef} className="flex flex-row w-full bg-slate-600 p-4 space-x-4" style={{height:'580px'}}>
+        <div ref={filterRef} className="flex flex-row w-full bg-slate-600 p-4 space-x-4" style={{height:'660px'}}>
             <div className="flex flex-col w-1/3 h-full space-y-4">
                 <div className="flex flex-col">
                     <div className="text-white text-2xl font-bold">
@@ -235,7 +235,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                     </div>
                     {!divisionRollup && !districtRollup ?
                     <DropdownFilter key={division[0]} tsURL={tsURL} runtimeFilters={{
-                        col1:"Division Name",
+                        col1:FieldName.DIVISION,
                         op1:divisionExclude? "NE" : "IN",
                         val1:division
                     }} value={district} field={FieldName.DISTRICT} fieldLabel={FieldLabel.DISTRICT} setFilter={setDistrict} multiple={true}  height={"h-26"}></DropdownFilter>
@@ -257,13 +257,13 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                     </div>
                     {!storeRollup && !divisionRollup && !districtRollup ?
                     <DropdownFilter key={district[0] + division[0]} tsURL={tsURL} runtimeFilters={{
-                        col1:"District Name",
+                        col1:FieldName.DISTRICT,
                         op1:districtExclude? "NE" : "IN",
                         val1:district,
-                        col2:"Division Name",
+                        col2:FieldName.DIVISION,
                         op2:divisionExclude? "NE" : "IN",
                         val2:division
-                    }} value={store} field={FieldName.STORE} fieldLabel={FieldLabel.STORE} setFilter={setStore} multiple={false}  height={"h-8"}></DropdownFilter>
+                    }} value={store} field={FieldName.STORE} fieldLabel={FieldLabel.STORE} setFilter={setStore} multiple={true}  height={"h-26"}></DropdownFilter>
                     :
                     <div className="h-8 w-full bg-white flex items-center justify-center">
                     {storeRollup ? 'Rollup' : 'Not Included'}
@@ -361,16 +361,17 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             </div>
                             <hr className="border-t border-gray-300 mb-2" />
 
-                            <div><input className="mr-2" onChange={()=>toggleField("Corp. Banner")} type="checkbox"></input>Corp. Banner</div>
-                            <div><input className="mr-2" onChange={()=>toggleField("Store Banner")} type="checkbox"></input>Store Banner</div>
+                            <div><input className="mr-2" onChange={()=>toggleField("Banner Corporate")} type="checkbox"></input>Corp. Banner</div>
+                            <div><input className="mr-2" onChange={()=>toggleField("Banner Store")} type="checkbox"></input>Store Banner</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Vendor Brand")} type="checkbox"></input>Vendor</div>
+                            {/* class id + description when class selected */}
                             <div><input className="mr-2" onChange={()=>toggleField("Class")} type="checkbox"></input>Class</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Sub Class")} type="checkbox"></input>Sub Class</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Date")} type="checkbox"></input>Date</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Period ID")} type="checkbox"></input>Period ID</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Quarter ID")} type="checkbox"></input>Quarter ID</div>
                             <div><input className="mr-2" onChange={()=>toggleField("CIG")} type="checkbox"></input>CIG</div>
-                            <div><input className="mr-2" onChange={()=>toggleField("Parent Vendor")} type="checkbox"></input>Parent Vendor</div>
+                            <div><input className="mr-2" onChange={()=>toggleField("Vendor Parent")} type="checkbox"></input>Parent Vendor</div>
                             <div><input className="mr-2" onChange={()=>setSameStore(!sameStore)} type="checkbox"></input>Same Store</div>
                             <div><input className="mr-2" onChange={()=>setRegStore(!regStore)} type="checkbox"></input>Reg Stores Only</div>
                         </div>

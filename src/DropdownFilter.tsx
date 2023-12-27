@@ -23,7 +23,7 @@ export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,field
             credentials: 'include',
             body: JSON.stringify({
                 "logical_table_identifier": "5038aaef-031a-4c4e-a442-84b5ade2a218",
-                "query_string":'['+field+']',
+                "query_string":"["+field+"] sort by ["+field+"] ["+field+"] != '-1 N/A'", //Add sort by
                 "data_format": "COMPACT",
                 "record_offset": 0,
                 "runtime_filter":runtimeFilters,
