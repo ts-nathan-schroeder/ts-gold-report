@@ -21,7 +21,7 @@ export const Search = ({worksheetID}:SearchProps) => {
         }
     })
 
-    let searchBase = "[Week ID].'202327'";
+    let searchBase = "";//"[Week ID].'202327'";
     for (var field of BaseFields){
         searchBase+= " ["+field+"]"
     }
@@ -57,6 +57,9 @@ export const Search = ({worksheetID}:SearchProps) => {
             }
             }
         }}
+
+        
+
         //runtimeFilters={runtimeFilters}
         forceTable={true}
         dataSource={worksheetID}

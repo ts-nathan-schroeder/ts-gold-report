@@ -5,19 +5,19 @@ import {
     SearchEmbed,
     useEmbedRef
   } from "@thoughtspot/visual-embed-sdk/lib/src/react";
-  import { HiBan, HiMinusCircle, HiPlay, HiPlusCircle } from "react-icons/hi";
+  import { HiBan, HiMinusCircle, HiPencil, HiPlay, HiPlusCircle } from "react-icons/hi";
   import { HiFunnel, HiMiniPlay } from "react-icons/hi2";
 
   import {DateRangePicker} from "react-date-range"
 
 
-import {FieldName, FieldLabel, GroupFields, CategoryFields, UPCFields} from "./DataDefinitions"
+import {FieldName, FieldLabel, GroupFields, CategoryFields, UPCFields, FieldID} from "./DataDefinitions"
 interface FilterProps{
     tsURL: string,
 }
 
 export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
-    const [calendarWeek, setCalendarWeek] = useState('promo')
+    const [calendarWeek, setCalendarWeek] = useState('fiscal')
     const [timeFrame,setTimeFrame] = useState('this week')
     const [division, setDivision] = useState([])
     const [district, setDistrict] = useState([])
@@ -50,6 +50,32 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
     const [dateRange, setDateRange] = useState<any[]>()
 
     const filterRef = useRef<HTMLDivElement>(null);
+
+    const [copyPasteProductList, setCopyPasteProductList] = useState<string[] | null>(null)
+    const [copyPasteProductListColumn, setCopyPasteProductListColumn] = useState<string | null>(null);
+    const [copyPasteLocationList, setCopyPasteLocationList] = useState<string[] | null>(null)
+    const [copyPasteLocationListColumn, setCopyPasteLocationListColumn] = useState<string | null>(null);
+
+
+    function toggleCopyProductPaste(val: string[], field: string){
+        if (val.length > 0){
+            setCopyPasteProductList(val)
+            setCopyPasteProductListColumn(field)
+        }else{
+            setCopyPasteProductList(null)
+            setCopyPasteProductListColumn(null)
+        }
+    }
+    function toggleLocationCopyPaste(val: string[], field: string){
+        if (val.length > 0){
+            setCopyPasteLocationList(val)
+            setCopyPasteLocationListColumn(field)
+        }else{
+            setCopyPasteLocationList(null)
+            setCopyPasteLocationListColumn(null)
+        }
+    }
+
 
     function toggleExpandFilters(){
         if (filterRef && filterRef.current){
@@ -91,62 +117,76 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
             searchString+="["+field+"] "
         }
         //Add filters
-        if ((category.length > 0 || category[0]=='ALL') && !categoryRollup && !groupRollup)  {
-            if (!categoryRollup){
-                for (var categoryField of CategoryFields){
-                    searchString += " ["+categoryField+"]"
-                }      
+
+        if (copyPasteProductList && copyPasteProductList.length > 0){
+            for (var item of copyPasteProductList){
+                searchString+= " ["+copyPasteProductListColumn+"].'"+item+"'"
             }
-            if (categoryExclude) searchString+= " ["+FieldName.CATEGORY+"] !="
-            for (var value of category){
-                searchString+=" ["+FieldName.CATEGORY +"]."+"'"+value+"'"
+        }else{
+            if ((category.length > 0 || category[0]=='ALL') && !categoryRollup && !groupRollup)  {
+                if (!categoryRollup){
+                    for (var categoryField of CategoryFields){
+                        searchString += " ["+categoryField+"]"
+                    }      
+                }
+                if (categoryExclude) searchString+= " ["+FieldName.CATEGORY+"] !="
+                for (var value of category){
+                    searchString+=" ["+FieldName.CATEGORY +"]."+"'"+value+"'"
+                }
+            }
+            if ((group.length > 0 || group[0]=='ALL') && !groupRollup)  {
+                if (!groupRollup){
+                    for (var groupField of GroupFields){
+                        searchString += " ["+groupField+"]"
+                    }      
+                }
+                if (groupExclude) searchString+= " ["+FieldName.GROUP+ "] !="
+                for (var value of group){
+                    searchString+=" ["+FieldName.GROUP+"]."+"'"+value+"'"
+                }
+            }
+            if ((upc.length > 0 || upc[0]=='ALL') && !upcRollup && !groupRollup && !categoryRollup)  {
+                if (!upcRollup){
+                    for (var upcField of UPCFields){
+                        searchString += " ["+upcField+"]"
+                    }      
+                }
+                if (upcExclude) searchString+= " ["+FieldName.UPC+"] !="
+                for (var value of upc){
+                    searchString+=" ["+FieldName.UPC+"]."+"'"+value+"'"
+                }
+            }
+            if ((store.length > 0 || store[0]=='ALL') && !divisionRollup)  {
+                if (storeExclude) searchString+= " ["+FieldName.STORE +"] !="
+                for (var value of store){
+                    searchString+=" ["+FieldName.STORE+"]."+"'"+value+"'"
+                }
+            }
+            if ((district.length > 0 || district[0]=='ALL') && !districtRollup)  {
+                if (districtExclude) searchString+= " ["+FieldName.DISTRICT+"] !="
+                for (var value of district){
+                    searchString+=" ["+FieldName.DISTRICT+"]."+"'"+value+"'"
+                }
+            }
+            if ((division.length > 0 || division[0]=='ALL') && !divisionRollup) {
+                if (divisionExclude) searchString+=" ["+FieldName.DIVISION+"] !="
+                for (var value of division){
+                    searchString+=" ["+FieldName.DIVISION+"]."+"'"+value+"'"
+                }
+            }
+            if (sameStore){
+                searchString+= " [Same Store].'true'"
+            }
+            if (regStore){
+                searchString+=" [Conventional Store Flag].'true'"
             }
         }
-        if ((group.length > 0 || group[0]=='ALL') && !groupRollup)  {
-            if (!groupRollup){
-                for (var groupField of GroupFields){
-                    searchString += " ["+groupField+"]"
-                }      
-            }
-            if (groupExclude) searchString+= " ["+FieldName.GROUP+ "] !="
-            for (var value of group){
-                searchString+=" ["+FieldName.GROUP+"]."+"'"+value+"'"
-            }
-        }
-        if ((upc.length > 0 || upc[0]=='ALL') && !upcRollup && !groupRollup && !categoryRollup)  {
-            if (!upcRollup){
-                for (var upcField of UPCFields){
-                    searchString += " ["+upcField+"]"
-                }      
-            }
-            if (upcExclude) searchString+= " ["+FieldName.UPC+"] !="
-            for (var value of upc){
-                searchString+=" ["+FieldName.UPC+"]."+"'"+value+"'"
-            }
-        }
-        if ((store.length > 0 || store[0]=='ALL') && !divisionRollup)  {
-            if (storeExclude) searchString+= " ["+FieldName.STORE +"] !="
-            for (var value of store){
-                searchString+=" ["+FieldName.STORE+"]."+"'"+value+"'"
-            }
-        }
-        if ((district.length > 0 || district[0]=='ALL') && !districtRollup)  {
-            if (districtExclude) searchString+= " ["+FieldName.DISTRICT+"] !="
-            for (var value of district){
-                searchString+=" ["+FieldName.DISTRICT+"]."+"'"+value+"'"
-            }
-        }
-        if ((division.length > 0 || division[0]=='ALL') && !divisionRollup) {
-            if (divisionExclude) searchString+=" ["+FieldName.DIVISION+"] !="
-            for (var value of division){
-                searchString+=" ["+FieldName.DIVISION+"]."+"'"+value+"'"
-            }
-        }
-        if (sameStore){
-            searchString+= " [Same Store].'true'"
-        }
-        if (regStore){
-            searchString+=" [Conventional Store Flag].'true'"
+        
+        if (calendarWeek == "fiscal"){
+            searchString += " [Date].'"+timeFrame+"'"
+        }else{ 
+            searchString += " [Promo Week Filters].'"+timeFrame+"'"
+
         }
 
         // if (groupRollup){
@@ -175,27 +215,42 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                     </div>
                     <div className="bg-slate-100 rounded-lg p-4 text-lg">
                         <div className="font-bold">Choose Time Frame</div>
-                        <div onChange={(e:any)=>setTimeFrame(e.target.value)}>
-                            <input type="radio" value="promo" name="timeframe" /> Promo Week
-                            <input className="ml-4" type="radio" value="fiscal" name="timeframe" /> Fiscal Week
+                        <div  onChange={(e:any)=>{
+                            setCalendarWeek(e.target.value)
+                            if (e.target.value == "fiscal"){
+                                setTimeFrame("last week")
+                            }else{
+                                setTimeFrame("last 4 weeks")
+                            }
+                        }}>
+                            <input checked={calendarWeek=="fiscal"}  type="radio" value="fiscal" name="timeframe" /> Fiscal Week
+                            <input checked={calendarWeek=="promo"} className="ml-4" type="radio" value="promo" name="timeframe" /> Promo Week
                         </div>
-
+                        {calendarWeek == "fiscal" ?
                         <select className="w-full" onChange={(e:any)=>setTimeFrame(e.target.value)}>
                             <option value='last week'>Last Week</option>
-                            <option value='last 4 weeks'>Last 4 Weeks</option>
+                            <option value='yesterday'>Yesterday</option>
+                            <option value='today'>Today</option>
+                            <option value='Last 4 weeks'>Last 4 Weeks</option>
                             <option value='last 12 weeks'>Last 12 Weeks</option>
                             <option value='last 24 weeks'>Last 24 Weeks </option>
                             <option value='last 26 weeks'>Last 26 Weeks</option>
                             <option value='last 52 weeks'>Last 52 Weeks</option>
-                            <option value='yesterday'>Yesterday</option>
-                            <option value='today'>Today</option>
                             <option value='last quarter'>Last Quarter</option>
-                            <option value='last 4 weeks'>Last Period</option>
                             <option value='last year'>Last Year</option>
                             <option value='this quarter'>This Quarter</option>
-                            <option value='last 4 weeks'>This Period</option>
                             <option value='year to date'>Year To Date</option>
                         </select>
+                        :
+                        <select className="w-full" onChange={(e:any)=>setTimeFrame(e.target.value)}>
+                            <option value='Last 4 Promo Weeks'>Last 4 Weeks</option>
+                            <option value='Last 12 Promo Weeks'>Last 12 Weeks</option>
+                            <option value='Last 24 Promo Weeks'>Last 24 Weeks </option>
+                            <option value='Last 26 Promo Weeks'>Last 26 Weeks</option>
+                            <option value='Last 52 Promo Weeks'>Last 52 Weeks</option>
+                        </select>
+                        }
+
                     </div>
                 </div>
                 
@@ -203,6 +258,13 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                     <div className="text-white text-2xl font-bold">
                         2. LOCATION
                     </div>
+                    {(copyPasteProductList && copyPasteProductList.length >0) ?
+                        <div className="flex flex-col w-full h-full items-center justify-center bg-slate-100 rounded-lg p-4 space-y-4">
+                        <div> Manual values entered for: <b>{copyPasteProductListColumn} </b></div>
+                        <div> {copyPasteProductList.length < 20 ? copyPasteProductList.join(", ") : copyPasteProductList.length + " Values"}</div>
+                        <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleCopyProductPaste([],"")}>Clear</button>
+                        </div>
+                    :
                     <div className="flex flex-col bg-slate-100 rounded-lg p-4 space-y-4">
                     <div className="flex flex-col text-lg">
                     <div className="flex flex-row font-bold w-full">
@@ -211,8 +273,8 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             <IncludeExcludeButton value={divisionExclude}  setValue={setDivisionExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-1/4">
-                            <div className="mr-2 font-normal">Roll Up</div>
-                            <input onChange={()=>setDivisionRollup(!divisionRollup)} type="checkbox"></input>
+                            <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.DIVISION)} field={FieldLabel.DIVISION}></CopyPasteButton>
+                            <RollUpButton onChange={() => setDivisionRollup(!divisionRollup)} />
                         </div>
                     </div>
                     {!divisionRollup ?
@@ -229,8 +291,8 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <IncludeExcludeButton value={districtExclude}  setValue={setDistrictExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-3/4">
-                            <div className="mr-2 font-normal">Roll Up</div>
-                            <input onChange={()=>setDistrictRollup(!districtRollup)} type="checkbox"></input>
+                            <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.DISTRICT)} field={FieldLabel.DISTRICT}></CopyPasteButton>
+                            <RollUpButton onChange={() => setDistrictRollup(!districtRollup)} />
                         </div>
                     </div>
                     {!divisionRollup && !districtRollup ?
@@ -251,8 +313,8 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <IncludeExcludeButton value={storeExclude}  setValue={setStoreExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-1/2">
-                            <div className="mr-2 font-normal">Roll Up</div>
-                            <input onChange={()=>setStoreRoleup(!storeRollup)} type="checkbox"></input>
+                            <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.STORE)} field={FieldLabel.STORE}></CopyPasteButton>
+                            <RollUpButton onChange={() => setStoreRoleup(!storeRollup)} />
                         </div>
                     </div>
                     {!storeRollup && !divisionRollup && !districtRollup ?
@@ -271,12 +333,31 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                     }
                     </div>
                     </div>
+                }
                 </div>
             </div>
             <div className="flex flex-col w-full h-full">
             <   div className="text-white text-2xl font-bold">
                 3. PRODUCT HIERARCHY
                 </div>
+                {(copyPasteProductList && copyPasteProductList.length >0) ?
+                
+                
+                <div className="flex flex-col w-full h-full items-center justify-center bg-slate-100 rounded-lg p-4 space-y-4">
+                    <div> Manual values entered for: <b>{copyPasteProductListColumn} </b></div>
+                    <div> {copyPasteProductList.length < 20 ? copyPasteProductList.join(", ") : copyPasteProductList.length + " Values"}</div>
+                    <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleCopyProductPaste([],"")}>Clear</button>
+                    <div className="h-24"/>
+                    <div onClick={onReportLoad}  className="flex bg-slate-600 w-96 hover:bg-slate-500 align-center items-center p-2  text-white font-bold rounded-lg  hover:cursor-pointer">
+                        <span>Load Report</span>
+                        <div className="ml-auto flex items-center bg-yellow-400 hover:bg-yellow-300 rounded-lg px-4 py-1">
+                            <HiMiniPlay className="mr-2" /> {/* Icon next to "GO" */}
+                            GO!
+                        </div>
+                    </div>
+                
+                </div>
+                :
                 <div className="flex flex-row w-full h-full bg-slate-100 rounded-lg p-4 space-x-4">
                     <div className="flex flex-col h-full w-5/12 text-lg">
                         <div className="mb-8">
@@ -285,8 +366,8 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                 <IncludeExcludeButton value={groupExclude}  setValue={setGroupExclude}></IncludeExcludeButton>
                                 </div>
                                 <div className="flex justify-end w-1/2">
-                                    <div className="mr-2 font-normal">Roll Up</div>
-                                    <input onChange={()=>setGroupRollup(!groupRollup)} type="checkbox"></input>
+                                    <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.GROUP)} field={FieldLabel.GROUP}></CopyPasteButton>
+                                    <RollUpButton onChange={()=>setGroupRollup(!groupRollup)} />
                                 </div>
                             </div>
                             <DropdownFilter tsURL={tsURL} runtimeFilters={{}} value={group} fieldLabel={FieldLabel.GROUP} field={FieldName.GROUP} setFilter={setGroup} multiple={true} height={"h-52"}></DropdownFilter>
@@ -297,8 +378,8 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     <IncludeExcludeButton value={categoryExclude}  setValue={setCategoryExclude}></IncludeExcludeButton>
                                     </div>
                                     <div className="flex justify-end w-1/2">
-                                        <div className="mr-2 font-normal">Roll Up</div>
-                                        <input onChange={()=>setCategoryRollup(!categoryRollup)} type="checkbox"></input>
+                                        <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldName.CATEGORY)} field={FieldLabel.CATEGORY}></CopyPasteButton>
+                                        <RollUpButton onChange={() => setCategoryRollup(!categoryRollup)} />
                                     </div>
                             </div>
                             {group.length>0 && group[0]!='ALL' ? 
@@ -323,8 +404,9 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     <IncludeExcludeButton value={upcExclude}  setValue={setUpcExclude}></IncludeExcludeButton>
                                     </div>
                                     <div className="flex justify-end w-1/2">
-                                        <div className="mr-2 font-normal">Rollup</div>
-                                        <input onChange={()=>setUpcRollup(!upcRollup)} type="checkbox"></input>
+                                        <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.UPC)} field={FieldLabel.UPC}></CopyPasteButton>
+                                        <RollUpButton onChange={() => setUpcRollup(!upcRollup)} />
+
                                     </div>
                                 </div>
                                 {group.length>0 && group[0]!='ALL'&& category.length>0 && category[0]!='ALL'  ?
@@ -366,6 +448,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             <div><input className="mr-2" onChange={()=>toggleField("Vendor Brand")} type="checkbox"></input>Vendor</div>
                             {/* class id + description when class selected */}
                             <div><input className="mr-2" onChange={()=>toggleField("Class")} type="checkbox"></input>Class</div>
+
                             <div><input className="mr-2" onChange={()=>toggleField("Sub Class")} type="checkbox"></input>Sub Class</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Date")} type="checkbox"></input>Date</div>
                             <div><input className="mr-2" onChange={()=>toggleField("Period ID")} type="checkbox"></input>Period ID</div>
@@ -387,10 +470,59 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
 
                 </div>
 
+                }
             </div>
         </div>
         </div>
 
+    )
+}
+
+interface CopyPasteButtonProps {
+    onSubmit: (list: string[])=> void,
+    field: string
+}
+const CopyPasteButton: React.FC<CopyPasteButtonProps> = ({onSubmit, field}:CopyPasteButtonProps )=> {
+    const [popupVisible, setPopupVisible] = useState(false);
+    const [values, setValues] = useState<string>('')
+
+    const ToggleSubmit = () =>{
+        setPopupVisible(false);
+        onSubmit(values.split("\n"))
+    }
+    const ToggleClear = () => {
+        setValues("")
+        setPopupVisible(false);
+        onSubmit([])
+
+    }
+    return (
+        <>
+            <HiPencil onClick={() => setPopupVisible(!popupVisible)}></HiPencil>
+            {popupVisible && (
+                
+            <div className="absolute w-96 flex flex-col shadow-2xl border-1 border-slate-600 bg-slate-200 rounded-lg font-normal p-4 space-y-4">
+                <div className="w-full">{field + " - Paste a list of IDs"}</div>
+                <textarea className="w-90 h-40 rounded-md" value={values} onChange={(e)=> setValues(e.target.value)}></textarea>
+                <div className="bg-slate-600 h-16 w-full items-center justify-center flex space-x-4 rounded-lg">
+                <button className="bg-yellow-400 w-24 h-12 rounded-lg text-white " onClick={ToggleSubmit}>Submit</button>
+                <button className="bg-gray-400 w-24 h-12 rounded-lg text-white " onClick={ToggleClear}>Clear</button>
+                </div>
+            </div>
+            
+            )}
+        </>
+    )
+}
+interface RollUpButtonProps {
+    onChange:  () => void,
+}
+const RollUpButton: React.FC<RollUpButtonProps> = ({onChange}:RollUpButtonProps )=> {
+    return (
+        <>
+            <div className="mr-2 font-normal">Roll Up</div>
+            <input onChange={onChange} type="checkbox"></input>
+        </>
     )
 }
 interface IncludeExcludeButtonProps {

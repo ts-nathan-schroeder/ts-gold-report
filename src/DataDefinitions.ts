@@ -6,6 +6,14 @@ export enum FieldName {
     DISTRICT = 'District',
     UPC = 'Internet Item Description'
 }
+export enum FieldID {
+    STORE = 'Store ID',
+    CATEGORY = 'Category ID',
+    GROUP = 'Group ID',
+    DIVISION = 'Division ID',
+    DISTRICT = 'District ID',
+    UPC = 'UPC ID'
+}
 export enum FieldLabel {
     STORE = 'STORES',
     CATEGORY = 'CATEGORIES',
