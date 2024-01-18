@@ -41,6 +41,17 @@ export const BaseFields: string[] = [
     'AGP Rate',
     'AGP Rate PY'
 ]
+export const StoreFields: string [] = [
+    'Store ID'
+]
+export const DistrictFields: string[] = [
+    'District ID',
+    'District Name'
+]
+export const DivisionFields: string[] = [
+    'Division ID',
+    'Division Name'
+]
 export const WeekRollupFields: string[] = [
     'Weeks Scanning',
     'Weeks Scanning PY',

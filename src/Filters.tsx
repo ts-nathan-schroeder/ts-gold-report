@@ -11,7 +11,7 @@ import {
   import {DateRangePicker} from "react-date-range"
 
 
-import {FieldName, FieldLabel, GroupFields, CategoryFields, UPCFields, FieldID} from "./DataDefinitions"
+import {FieldName, FieldLabel, GroupFields, CategoryFields, UPCFields, FieldID, StoreFields, DivisionFields, DistrictFields} from "./DataDefinitions"
 interface FilterProps{
     tsURL: string,
 }
@@ -57,7 +57,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
     const [copyPasteLocationListColumn, setCopyPasteLocationListColumn] = useState<string | null>(null);
 
 
-    function toggleCopyProductPaste(val: string[], field: string){
+    function toggleProductCopyPaste(val: string[], field: string){
         if (val.length > 0){
             setCopyPasteProductList(val)
             setCopyPasteProductListColumn(field)
@@ -122,65 +122,99 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
             for (var item of copyPasteProductList){
                 searchString+= " ["+copyPasteProductListColumn+"].'"+item+"'"
             }
-        }else{
-            if ((category.length > 0 || category[0]=='ALL') && !categoryRollup && !groupRollup)  {
-                if (!categoryRollup){
-                    for (var categoryField of CategoryFields){
-                        searchString += " ["+categoryField+"]"
-                    }      
-                }
+        }
+        if (copyPasteLocationList && copyPasteLocationList.length > 0){
+            for (var item of copyPasteLocationList){
+                searchString+= " ["+copyPasteLocationListColumn+"].'"+item+"'"
+            }
+        }
+
+        //Add Product Fields
+        if (copyPasteProductListColumn == FieldID.CATEGORY || (category.length > 0 && category[0]!='ALL' && !categoryRollup)){
+            for (var categoryField of CategoryFields){
+                searchString+=" ["+categoryField+"]"
+            } 
+        }
+        if (copyPasteProductListColumn == FieldID.GROUP || (group.length > 0 && group[0]!='ALL' && !groupRollup)){
+            for (var groupField of GroupFields){
+                searchString += " ["+groupField+"]"
+            }    
+        }
+        if (copyPasteProductListColumn == FieldID.UPC || (upc.length > 0 && upc[0]!='ALL' && !upcRollup)){
+            for (var upcField of UPCFields){
+                searchString += " ["+upcField+"]"
+            }      
+        }
+
+        //Add Location Fields
+        if (!storeRollup){
+            for (var storeField of StoreFields){
+                searchString += " ["+storeField+"]"
+            }
+        }
+        if (!divisionRollup){
+            for (var divisionField of DivisionFields){
+                searchString += " ["+divisionField+"]"
+            }
+        }
+        if (!storeRollup){
+            for (var districtField of DistrictFields){
+                searchString += " ["+districtField+"]"
+            }
+        }
+
+
+        //Add Product Filters
+        if (!copyPasteProductList){
+            if ((category.length > 0 && category[0]!='ALL')) {
                 if (categoryExclude) searchString+= " ["+FieldName.CATEGORY+"] !="
                 for (var value of category){
                     searchString+=" ["+FieldName.CATEGORY +"]."+"'"+value+"'"
-                }
+                }        
             }
-            if ((group.length > 0 || group[0]=='ALL') && !groupRollup)  {
-                if (!groupRollup){
-                    for (var groupField of GroupFields){
-                        searchString += " ["+groupField+"]"
-                    }      
-                }
+            if ((group.length > 0 && group[0]!='ALL'))  {
                 if (groupExclude) searchString+= " ["+FieldName.GROUP+ "] !="
                 for (var value of group){
                     searchString+=" ["+FieldName.GROUP+"]."+"'"+value+"'"
                 }
             }
-            if ((upc.length > 0 || upc[0]=='ALL') && !upcRollup && !groupRollup && !categoryRollup)  {
-                if (!upcRollup){
-                    for (var upcField of UPCFields){
-                        searchString += " ["+upcField+"]"
-                    }      
-                }
+            if ((upc.length > 0 && upc[0]!='ALL'))  {
                 if (upcExclude) searchString+= " ["+FieldName.UPC+"] !="
                 for (var value of upc){
                     searchString+=" ["+FieldName.UPC+"]."+"'"+value+"'"
-                }
+                }            
             }
-            if ((store.length > 0 || store[0]=='ALL') && !divisionRollup)  {
+        }
+
+        //Add Store Filters
+        if (!copyPasteLocationList){
+            if ((store.length > 0 && store[0]!='ALL') )  {
                 if (storeExclude) searchString+= " ["+FieldName.STORE +"] !="
                 for (var value of store){
                     searchString+=" ["+FieldName.STORE+"]."+"'"+value+"'"
                 }
             }
-            if ((district.length > 0 || district[0]=='ALL') && !districtRollup)  {
+            if ((district.length > 0 && district[0]!='ALL'))  {
                 if (districtExclude) searchString+= " ["+FieldName.DISTRICT+"] !="
                 for (var value of district){
                     searchString+=" ["+FieldName.DISTRICT+"]."+"'"+value+"'"
                 }
             }
-            if ((division.length > 0 || division[0]=='ALL') && !divisionRollup) {
+            if ((division.length > 0 && division[0]!='ALL')) {
                 if (divisionExclude) searchString+=" ["+FieldName.DIVISION+"] !="
                 for (var value of division){
                     searchString+=" ["+FieldName.DIVISION+"]."+"'"+value+"'"
                 }
             }
-            if (sameStore){
-                searchString+= " [Same Store].'true'"
-            }
-            if (regStore){
-                searchString+=" [Conventional Store Flag].'true'"
-            }
         }
+
+        if (sameStore){
+            searchString+= " [Same Store].'true'"
+        }
+        if (regStore){
+            searchString+=" [Conventional Store Flag].'true'"
+        }
+        
         
         if (calendarWeek == "fiscal"){
             searchString += " [Date].'"+timeFrame+"'"
@@ -258,11 +292,11 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                     <div className="text-white text-2xl font-bold">
                         2. LOCATION
                     </div>
-                    {(copyPasteProductList && copyPasteProductList.length >0) ?
+                    {(copyPasteLocationList && copyPasteLocationList.length >0) ?
                         <div className="flex flex-col w-full h-full items-center justify-center bg-slate-100 rounded-lg p-4 space-y-4">
-                        <div> Manual values entered for: <b>{copyPasteProductListColumn} </b></div>
-                        <div> {copyPasteProductList.length < 20 ? copyPasteProductList.join(", ") : copyPasteProductList.length + " Values"}</div>
-                        <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleCopyProductPaste([],"")}>Clear</button>
+                        <div> Manual values entered for: <b>{copyPasteLocationListColumn} </b></div>
+                        <div> {copyPasteLocationList.length < 20 ? copyPasteLocationList.join(", ") : copyPasteLocationList.length + " Values"}</div>
+                        <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleLocationCopyPaste([],"")}>Clear</button>
                         </div>
                     :
                     <div className="flex flex-col bg-slate-100 rounded-lg p-4 space-y-4">
@@ -273,7 +307,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             <IncludeExcludeButton value={divisionExclude}  setValue={setDivisionExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-1/4">
-                            <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.DIVISION)} field={FieldLabel.DIVISION}></CopyPasteButton>
+                            <CopyPasteButton onSubmit={(val: string[])=>toggleLocationCopyPaste(val, FieldID.DIVISION)} field={FieldLabel.DIVISION}></CopyPasteButton>
                             <RollUpButton onChange={() => setDivisionRollup(!divisionRollup)} />
                         </div>
                     </div>
@@ -291,7 +325,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <IncludeExcludeButton value={districtExclude}  setValue={setDistrictExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-3/4">
-                            <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.DISTRICT)} field={FieldLabel.DISTRICT}></CopyPasteButton>
+                            <CopyPasteButton onSubmit={(val: string[])=>toggleLocationCopyPaste(val, FieldID.DISTRICT)} field={FieldLabel.DISTRICT}></CopyPasteButton>
                             <RollUpButton onChange={() => setDistrictRollup(!districtRollup)} />
                         </div>
                     </div>
@@ -313,7 +347,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <IncludeExcludeButton value={storeExclude}  setValue={setStoreExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-1/2">
-                            <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.STORE)} field={FieldLabel.STORE}></CopyPasteButton>
+                            <CopyPasteButton onSubmit={(val: string[])=>toggleLocationCopyPaste(val, FieldID.STORE)} field={FieldLabel.STORE}></CopyPasteButton>
                             <RollUpButton onChange={() => setStoreRoleup(!storeRollup)} />
                         </div>
                     </div>
@@ -337,36 +371,29 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                 </div>
             </div>
             <div className="flex flex-col w-full h-full">
-            <   div className="text-white text-2xl font-bold">
+                <div className="text-white text-2xl font-bold">
                 3. PRODUCT HIERARCHY
                 </div>
+                
+                <div className="flex flex-col w-full h-full items-center justify-center bg-slate-100 rounded-lg p-4">
                 {(copyPasteProductList && copyPasteProductList.length >0) ?
-                
-                
-                <div className="flex flex-col w-full h-full items-center justify-center bg-slate-100 rounded-lg p-4 space-y-4">
+
+                <div>
                     <div> Manual values entered for: <b>{copyPasteProductListColumn} </b></div>
                     <div> {copyPasteProductList.length < 20 ? copyPasteProductList.join(", ") : copyPasteProductList.length + " Values"}</div>
-                    <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleCopyProductPaste([],"")}>Clear</button>
-                    <div className="h-24"/>
-                    <div onClick={onReportLoad}  className="flex bg-slate-600 w-96 hover:bg-slate-500 align-center items-center p-2  text-white font-bold rounded-lg  hover:cursor-pointer">
-                        <span>Load Report</span>
-                        <div className="ml-auto flex items-center bg-yellow-400 hover:bg-yellow-300 rounded-lg px-4 py-1">
-                            <HiMiniPlay className="mr-2" /> {/* Icon next to "GO" */}
-                            GO!
-                        </div>
-                    </div>
-                
+                    <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleProductCopyPaste([],"")}>Clear</button>                    
                 </div>
                 :
-                <div className="flex flex-row w-full h-full bg-slate-100 rounded-lg p-4 space-x-4">
+                <div className="flex flex-row w-full h-full bg-slate-100 rounded-lg space-x-4">
+                    <></>
                     <div className="flex flex-col h-full w-5/12 text-lg">
-                        <div className="mb-8">
+                        <div className="mb-4">
                             <div className="flex flex-row font-bold w-full">
                                 <div className="flex justify-start w-1/2">Group Hierarchy
                                 <IncludeExcludeButton value={groupExclude}  setValue={setGroupExclude}></IncludeExcludeButton>
                                 </div>
                                 <div className="flex justify-end w-1/2">
-                                    <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.GROUP)} field={FieldLabel.GROUP}></CopyPasteButton>
+                                    <CopyPasteButton onSubmit={(val: string[])=>toggleProductCopyPaste(val, FieldID.GROUP)} field={FieldLabel.GROUP}></CopyPasteButton>
                                     <RollUpButton onChange={()=>setGroupRollup(!groupRollup)} />
                                 </div>
                             </div>
@@ -378,7 +405,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     <IncludeExcludeButton value={categoryExclude}  setValue={setCategoryExclude}></IncludeExcludeButton>
                                     </div>
                                     <div className="flex justify-end w-1/2">
-                                        <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldName.CATEGORY)} field={FieldLabel.CATEGORY}></CopyPasteButton>
+                                        <CopyPasteButton onSubmit={(val: string[])=>toggleProductCopyPaste(val, FieldName.CATEGORY)} field={FieldLabel.CATEGORY}></CopyPasteButton>
                                         <RollUpButton onChange={() => setCategoryRollup(!categoryRollup)} />
                                     </div>
                             </div>
@@ -404,7 +431,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     <IncludeExcludeButton value={upcExclude}  setValue={setUpcExclude}></IncludeExcludeButton>
                                     </div>
                                     <div className="flex justify-end w-1/2">
-                                        <CopyPasteButton onSubmit={(val: string[])=>toggleCopyProductPaste(val, FieldID.UPC)} field={FieldLabel.UPC}></CopyPasteButton>
+                                        <CopyPasteButton onSubmit={(val: string[])=>toggleProductCopyPaste(val, FieldID.UPC)} field={FieldLabel.UPC}></CopyPasteButton>
                                         <RollUpButton onChange={() => setUpcRollup(!upcRollup)} />
 
                                     </div>
@@ -459,19 +486,21 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             <div><input className="mr-2" onChange={()=>setRegStore(!regStore)} type="checkbox"></input>Reg Stores Only</div>
                         </div>
                     </div>
-                    <div onClick={onReportLoad}  className="flex bg-slate-600 hover:bg-slate-500 align-center items-center p-2 text-white font-bold rounded-lg  hover:cursor-pointer">
+
+                    </div>
+                </div>
+                }
+
+                    <div onClick={onReportLoad}  className="flex w-full bg-slate-600 hover:bg-slate-500 align-center items-center p-2 text-white font-bold rounded-lg  hover:cursor-pointer">
                         <span>Load Report</span>
                         <div className="ml-auto flex items-center bg-yellow-400 hover:bg-yellow-300 rounded-lg px-4 py-1">
                             <HiMiniPlay className="mr-2" /> {/* Icon next to "GO" */}
                             GO!
                         </div>
                     </div>
-                    </div>
-
-                </div>
-
-                }
+      
             </div>
+        </div>
         </div>
         </div>
 
