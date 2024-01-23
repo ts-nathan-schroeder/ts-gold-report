@@ -18,13 +18,13 @@ interface FilterProps{
 
 export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
     const [calendarWeek, setCalendarWeek] = useState('fiscal')
-    const [timeFrame,setTimeFrame] = useState('this week')
-    const [division, setDivision] = useState([])
-    const [district, setDistrict] = useState([])
-    const [category, setCategory] = useState([])
-    const [store, setStore] = useState([])
-    const [group, setGroup] = useState([])
-    const [upc, setUpc] = useState([])
+    const [timeFrame,setTimeFrame] = useState('last week')
+    const [division, setDivision] = useState<string[]>([])
+    const [district, setDistrict] = useState<string[]>([])
+    const [category, setCategory] = useState<string[]>([])
+    const [store, setStore] = useState<string[]>([])
+    const [group, setGroup] = useState<string[]>([])
+    const [upc, setUpc] = useState<string[]>([])
 
     const [groupRollup, setGroupRollup] = useState(false);
     const [storeRollup, setStoreRoleup] = useState(false);
@@ -147,17 +147,17 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         }
 
         //Add Location Fields
-        if (!storeRollup){
+        if (copyPasteLocationListColumn == FieldID.STORE || (store.length > 0 && store[0]!='ALL' && !storeRollup)){
             for (var storeField of StoreFields){
                 searchString += " ["+storeField+"]"
             }
         }
-        if (!divisionRollup){
+        if (copyPasteLocationListColumn == FieldID.STORE || (division.length > 0 && division[0]!='ALL' && !divisionRollup)){
             for (var divisionField of DivisionFields){
                 searchString += " ["+divisionField+"]"
             }
         }
-        if (!storeRollup){
+        if (copyPasteLocationListColumn == FieldID.DISTRICT || (district.length > 0 && district[0]!='ALL' && !districtRollup)){
             for (var districtField of DistrictFields){
                 searchString += " ["+districtField+"]"
             }
@@ -167,21 +167,21 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         //Add Product Filters
         if (!copyPasteProductList){
             if ((category.length > 0 && category[0]!='ALL')) {
-                if (categoryExclude) searchString+= " ["+FieldName.CATEGORY+"] !="
+                if (categoryExclude) searchString+= " ["+FieldID.CATEGORY+"] !="
                 for (var value of category){
-                    searchString+=" ["+FieldName.CATEGORY +"]."+"'"+value+"'"
+                    searchString+=" ["+FieldID.CATEGORY +"]."+"'"+value+"'"
                 }        
             }
             if ((group.length > 0 && group[0]!='ALL'))  {
-                if (groupExclude) searchString+= " ["+FieldName.GROUP+ "] !="
+                if (groupExclude) searchString+= " ["+FieldID.GROUP+ "] !="
                 for (var value of group){
-                    searchString+=" ["+FieldName.GROUP+"]."+"'"+value+"'"
+                    searchString+=" ["+FieldID.GROUP+"]."+"'"+value+"'"
                 }
             }
             if ((upc.length > 0 && upc[0]!='ALL'))  {
-                if (upcExclude) searchString+= " ["+FieldName.UPC+"] !="
+                if (upcExclude) searchString+= " ["+FieldID.UPC+"] !="
                 for (var value of upc){
-                    searchString+=" ["+FieldName.UPC+"]."+"'"+value+"'"
+                    searchString+=" ["+FieldID.UPC+"]."+"'"+value+"'"
                 }            
             }
         }
@@ -189,21 +189,21 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
         //Add Store Filters
         if (!copyPasteLocationList){
             if ((store.length > 0 && store[0]!='ALL') )  {
-                if (storeExclude) searchString+= " ["+FieldName.STORE +"] !="
+                if (storeExclude) searchString+= " ["+FieldID.STORE +"] !="
                 for (var value of store){
-                    searchString+=" ["+FieldName.STORE+"]."+"'"+value+"'"
+                    searchString+=" ["+FieldID.STORE+"]."+"'"+value+"'"
                 }
             }
             if ((district.length > 0 && district[0]!='ALL'))  {
-                if (districtExclude) searchString+= " ["+FieldName.DISTRICT+"] !="
+                if (districtExclude) searchString+= " ["+FieldID.DISTRICT+"] !="
                 for (var value of district){
-                    searchString+=" ["+FieldName.DISTRICT+"]."+"'"+value+"'"
+                    searchString+=" ["+FieldID.DISTRICT+"]."+"'"+value+"'"
                 }
             }
             if ((division.length > 0 && division[0]!='ALL')) {
-                if (divisionExclude) searchString+=" ["+FieldName.DIVISION+"] !="
+                if (divisionExclude) searchString+=" ["+FieldID.DIVISION+"] !="
                 for (var value of division){
-                    searchString+=" ["+FieldName.DIVISION+"]."+"'"+value+"'"
+                    searchString+=" ["+FieldID.DIVISION+"]."+"'"+value+"'"
                 }
             }
         }
@@ -234,6 +234,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
             searchString: searchString}
         }});
         window.dispatchEvent(event)
+        toggleExpandFilters();
     }
 
 
@@ -263,6 +264,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         {calendarWeek == "fiscal" ?
                         <select className="w-full" onChange={(e:any)=>setTimeFrame(e.target.value)}>
                             <option value='last week'>Last Week</option>
+                            <option value='this week'>This Week</option>
                             <option value='yesterday'>Yesterday</option>
                             <option value='today'>Today</option>
                             <option value='Last 4 weeks'>Last 4 Weeks</option>
@@ -277,6 +279,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         </select>
                         :
                         <select className="w-full" onChange={(e:any)=>setTimeFrame(e.target.value)}>
+                            <option value='Last Promo Week'>Last Week</option>
                             <option value='Last 4 Promo Weeks'>Last 4 Weeks</option>
                             <option value='Last 12 Promo Weeks'>Last 12 Weeks</option>
                             <option value='Last 24 Promo Weeks'>Last 24 Weeks </option>
@@ -307,12 +310,12 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                             <IncludeExcludeButton value={divisionExclude}  setValue={setDivisionExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-1/4">
-                            <CopyPasteButton onSubmit={(val: string[])=>toggleLocationCopyPaste(val, FieldID.DIVISION)} field={FieldLabel.DIVISION}></CopyPasteButton>
+                            <CopyPasteButton onSubmit={(val: string[])=>setDivision(val)} field={FieldLabel.DIVISION}></CopyPasteButton>
                             <RollUpButton onChange={() => setDivisionRollup(!divisionRollup)} />
                         </div>
                     </div>
                     {!divisionRollup ?
-                    <DropdownFilter tsURL={tsURL} runtimeFilters={{}} value={division} field={FieldName.DIVISION} fieldLabel={FieldLabel.DIVISION} setFilter={setDivision} multiple={true}  height={"h-28"}></DropdownFilter>
+                    <DropdownFilter key={division.toString()} tsURL={tsURL} runtimeFilters={{}} value={division} field={FieldName.DIVISION} fieldId={FieldID.DIVISION} fieldLabel={FieldLabel.DIVISION} setFilter={setDivision} multiple={true}  height={"h-28"}></DropdownFilter>
                     :
                     <div className="h-28 w-full bg-white flex items-center justify-center">
                     {'All '+FieldLabel.DIVISION}
@@ -325,19 +328,19 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <IncludeExcludeButton value={districtExclude}  setValue={setDistrictExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-3/4">
-                            <CopyPasteButton onSubmit={(val: string[])=>toggleLocationCopyPaste(val, FieldID.DISTRICT)} field={FieldLabel.DISTRICT}></CopyPasteButton>
+                            <CopyPasteButton onSubmit={(val: string[])=>setDistrict(val)} field={FieldLabel.DISTRICT}></CopyPasteButton>
                             <RollUpButton onChange={() => setDistrictRollup(!districtRollup)} />
                         </div>
                     </div>
-                    {!divisionRollup && !districtRollup ?
+                    {division.length>0 && division[0]!='NONE'?
                     <DropdownFilter key={division[0]} tsURL={tsURL} runtimeFilters={{
-                        col1:FieldName.DIVISION,
+                        col1:FieldID.DIVISION,
                         op1:divisionExclude? "NE" : "IN",
                         val1:division
-                    }} value={district} field={FieldName.DISTRICT} fieldLabel={FieldLabel.DISTRICT} setFilter={setDistrict} multiple={true}  height={"h-26"}></DropdownFilter>
+                    }} value={district} field={FieldName.DISTRICT} fieldId={FieldID.DISTRICT} fieldLabel={FieldLabel.DISTRICT} setFilter={setDistrict} multiple={true}  height={"h-24"}></DropdownFilter>
                     :
-                    <div className="h-8 w-full bg-white flex items-center justify-center">
-                    {districtRollup ? 'Rollup' : 'Not Included'}
+                    <div className="h-24 w-full bg-white flex items-center justify-center">
+                        {'All '+FieldLabel.DISTRICT}
                     </div>
                     }
                     </div>
@@ -347,24 +350,26 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <IncludeExcludeButton value={storeExclude}  setValue={setStoreExclude}></IncludeExcludeButton>
                         </div>
                         <div className="flex justify-end w-1/2">
-                            <CopyPasteButton onSubmit={(val: string[])=>toggleLocationCopyPaste(val, FieldID.STORE)} field={FieldLabel.STORE}></CopyPasteButton>
+                            <CopyPasteButton onSubmit={(val: string[])=>setStore(val)} field={FieldLabel.STORE}></CopyPasteButton>
                             <RollUpButton onChange={() => setStoreRoleup(!storeRollup)} />
                         </div>
                     </div>
-                    {!storeRollup && !divisionRollup && !districtRollup ?
+                    {division.length>0 && division[0]!='NONE'&& district.length>0 && district[0]!='NONE'  ?
                     <DropdownFilter key={district[0] + division[0]} tsURL={tsURL} runtimeFilters={{
-                        col1:FieldName.DISTRICT,
+                        col1:FieldID.DISTRICT,
                         op1:districtExclude? "NE" : "IN",
                         val1:district,
-                        col2:FieldName.DIVISION,
+                        col2:FieldID.DIVISION,
                         op2:divisionExclude? "NE" : "IN",
                         val2:division
-                    }} value={store} field={FieldName.STORE} fieldLabel={FieldLabel.STORE} setFilter={setStore} multiple={true}  height={"h-26"}></DropdownFilter>
+                    }} value={store} field={FieldName.STORE} fieldId={FieldID.STORE} fieldLabel={FieldLabel.STORE} setFilter={setStore} multiple={true}  height={"h-24"}></DropdownFilter>
                     :
-                    <div className="h-8 w-full bg-white flex items-center justify-center">
-                    {storeRollup ? 'Rollup' : 'Not Included'}
+                    <div className="h-24 w-full bg-white flex items-center justify-center">
+                        {'All '+FieldLabel.STORE}
                     </div>
                     }
+
+
                     </div>
                     </div>
                 }
@@ -376,14 +381,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                 </div>
                 
                 <div className="flex flex-col w-full h-full items-center justify-center bg-slate-100 rounded-lg p-4">
-                {(copyPasteProductList && copyPasteProductList.length >0) ?
 
-                <div>
-                    <div> Manual values entered for: <b>{copyPasteProductListColumn} </b></div>
-                    <div> {copyPasteProductList.length < 20 ? copyPasteProductList.join(", ") : copyPasteProductList.length + " Values"}</div>
-                    <button className="bg-gray-400 w-24 h-12 rounded-lg text-white" onClick={() => toggleProductCopyPaste([],"")}>Clear</button>                    
-                </div>
-                :
                 <div className="flex flex-row w-full h-full bg-slate-100 rounded-lg space-x-4">
                     <></>
                     <div className="flex flex-col h-full w-5/12 text-lg">
@@ -393,11 +391,11 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                 <IncludeExcludeButton value={groupExclude}  setValue={setGroupExclude}></IncludeExcludeButton>
                                 </div>
                                 <div className="flex justify-end w-1/2">
-                                    <CopyPasteButton onSubmit={(val: string[])=>toggleProductCopyPaste(val, FieldID.GROUP)} field={FieldLabel.GROUP}></CopyPasteButton>
+                                    <CopyPasteButton onSubmit={(val: string[])=>setGroup(val)} field={FieldLabel.GROUP}></CopyPasteButton>
                                     <RollUpButton onChange={()=>setGroupRollup(!groupRollup)} />
                                 </div>
                             </div>
-                            <DropdownFilter tsURL={tsURL} runtimeFilters={{}} value={group} fieldLabel={FieldLabel.GROUP} field={FieldName.GROUP} setFilter={setGroup} multiple={true} height={"h-52"}></DropdownFilter>
+                            <DropdownFilter  key={group.toString()} tsURL={tsURL} runtimeFilters={{}} value={group} fieldId={FieldID.GROUP} fieldLabel={FieldLabel.GROUP} field={FieldName.GROUP} setFilter={setGroup} multiple={true} height={"h-52"}></DropdownFilter>
                         </div>
                         <div className="mb-4">
                             <div className="flex flex-row font-bold w-full">
@@ -405,16 +403,16 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     <IncludeExcludeButton value={categoryExclude}  setValue={setCategoryExclude}></IncludeExcludeButton>
                                     </div>
                                     <div className="flex justify-end w-1/2">
-                                        <CopyPasteButton onSubmit={(val: string[])=>toggleProductCopyPaste(val, FieldName.CATEGORY)} field={FieldLabel.CATEGORY}></CopyPasteButton>
+                                        <CopyPasteButton onSubmit={(val: string[])=>setCategory(val)} field={FieldLabel.CATEGORY}></CopyPasteButton>
                                         <RollUpButton onChange={() => setCategoryRollup(!categoryRollup)} />
                                     </div>
                             </div>
-                            {group.length>0 && group[0]!='ALL' ? 
+                            {group.length>0 && group[0]!='NONE' ? 
                             <DropdownFilter key={group[0]} tsURL={tsURL} runtimeFilters={{
-                                col1:FieldName.GROUP,
+                                col1:FieldID.GROUP,
                                 op1:groupExclude? "NE" : "IN",
                                 val1:group,
-                            }} value={category} field={FieldName.CATEGORY} fieldLabel={FieldLabel.CATEGORY} setFilter={setCategory} multiple={true} height={"h-52"}></DropdownFilter>
+                            }} value={category} field={FieldName.CATEGORY} fieldId={FieldID.CATEGORY} fieldLabel={FieldLabel.CATEGORY} setFilter={setCategory} multiple={true} height={"h-52"}></DropdownFilter>
                             :
                             <div className="h-52 w-full bg-white flex items-center justify-center">
                             {'All '+FieldLabel.CATEGORY}
@@ -431,20 +429,27 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                                     <IncludeExcludeButton value={upcExclude}  setValue={setUpcExclude}></IncludeExcludeButton>
                                     </div>
                                     <div className="flex justify-end w-1/2">
-                                        <CopyPasteButton onSubmit={(val: string[])=>toggleProductCopyPaste(val, FieldID.UPC)} field={FieldLabel.UPC}></CopyPasteButton>
+                                        <CopyPasteButton onSubmit={(val: string[])=>setUpc(val)} field={FieldLabel.UPC}></CopyPasteButton>
                                         <RollUpButton onChange={() => setUpcRollup(!upcRollup)} />
 
                                     </div>
                                 </div>
-                                {group.length>0 && group[0]!='ALL'&& category.length>0 && category[0]!='ALL'  ?
+                                {group.length>0 && group[0]!='NONE'&& category.length>0 && category[0]!='NONE'  ?
                                 <DropdownFilter key={group[0]+category[0]} tsURL={tsURL} runtimeFilters={{
-                                    col1:FieldName.GROUP,
+                                    col1:FieldID.GROUP,
                                     op1:groupExclude ? "NE" : "IN",
                                     val1:group,
-                                    col2:FieldName.CATEGORY,
+                                    col2:FieldID.CATEGORY,
                                     op2:categoryExclude ? "NE" : "IN" ,
-                                    val2:category
-                                }} value={upc} field={FieldName.UPC} fieldLabel={FieldLabel.UPC} setFilter={setUpc} multiple={true} height={"h-96"}></DropdownFilter>
+                                    val2:category,
+                                    // if (obNbSelection != "OB & NB"){
+                                    //     if (obNbSelection == "OB"){
+                                    //         searchString += " [Manufacture Type Code].'H'"
+                                    //     }else{
+                                    //         searchString += " [Manufacture Type Code].'N'" 
+                                    //     }
+                                    // }
+                                }} value={upc} field={FieldName.UPC} fieldId={FieldID.UPC} fieldLabel={FieldLabel.UPC} setFilter={setUpc} multiple={true} height={"h-96"}></DropdownFilter>
                                 :
                                 <div className="h-96 w-full bg-white flex items-center justify-center">
                                     {'All '+FieldLabel.UPC}
@@ -489,7 +494,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
 
                     </div>
                 </div>
-                }
+                
 
                     <div onClick={onReportLoad}  className="flex w-full bg-slate-600 hover:bg-slate-500 align-center items-center p-2 text-white font-bold rounded-lg  hover:cursor-pointer">
                         <span>Load Report</span>

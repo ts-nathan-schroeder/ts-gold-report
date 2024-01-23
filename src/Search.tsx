@@ -28,7 +28,7 @@ export const Search = ({worksheetID}:SearchProps) => {
     console.log(searchBase,searchString)
     return (
         <>
-        <div ref={ref} style={{height:'600px',display:'none',width:'100%'}}>
+        <div ref={ref} style={{height:'900px',display:'none',width:'100%'}}>
         <SearchEmbed
         searchOptions={{
             searchTokenString: searchString ? searchBase + searchString : '',
@@ -69,7 +69,7 @@ export const Search = ({worksheetID}:SearchProps) => {
                 loadingRef.current.style.display="none"
             }
         }}
-        frameParams={{height:'600px',width:'100%'}}></SearchEmbed>
+        frameParams={{height:'900px',width:'100%'}}></SearchEmbed>
         </div>
         
         <div ref={loadingRef} className="w-full flex h-full align-center justify-center bg-slate-600 font-bold text-white pt-40 text-2xl">

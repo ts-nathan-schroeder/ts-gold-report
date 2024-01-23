@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
+import { FieldID } from "./DataDefinitions"
 interface DropdownFilterProps {
     tsURL: string,
     field: string,
+    fieldId: string,
     fieldLabel: string,
     value: any[],
     runtimeFilters: {},
@@ -9,7 +11,7 @@ interface DropdownFilterProps {
     multiple: boolean,
     height:string
 }
-export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,fieldLabel,runtimeFilters,setFilter,multiple,height}: DropdownFilterProps) => {
+export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,fieldId, fieldLabel, value, runtimeFilters,setFilter,multiple,height}: DropdownFilterProps) => {
     const [options, setOptions] = useState<any[]>([])
     useEffect(()=>{
         var url = tsURL+"api/rest/2.0/searchdata"
@@ -23,7 +25,7 @@ export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,field
             credentials: 'include',
             body: JSON.stringify({
                 "logical_table_identifier": "5038aaef-031a-4c4e-a442-84b5ade2a218",
-                "query_string":"["+field+"] sort by ["+field+"] ["+field+"] != '-1 N/A'", //Add sort by
+                "query_string":"["+field+"] ["+fieldId+"] sort by ["+field+"] ["+field+"] != '-1 N/A'", //Division 45 supply, 15 denver, 35 eastern. Generally DELETE
                 "data_format": "COMPACT",
                 "record_offset": 0,
                 "runtime_filter":runtimeFilters,
@@ -33,14 +35,14 @@ export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,field
             let filterData = data.contents[0].data_rows;
             var optionsCopy: any[] = []
             for (var dataRow of filterData){
-                optionsCopy.push(dataRow[0]);
+                optionsCopy.push(dataRow);
             }
+            console.log(optionsCopy)
             setOptions(optionsCopy)
         })
     },[])
     return (
         <select className={height} style={{width:"100%"}} onChange={(e) => {
-            console.log(e.target.selectedOptions);
             if (multiple){
                 let filterVals = Array.from(e.target.selectedOptions).map((option) => {return option.value})
                 if (filterVals.includes("ALL")){
@@ -56,9 +58,17 @@ export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,field
                 }
             }
             }} multiple={multiple}>
-            <option selected={true} value={"ALL"}>ALL {fieldLabel}</option>
+            <option selected={value.length == 0 || value[0] == 'NONE' ? true : false } value={"NONE"}>NONE</option>
+            <option value={"ALL"}>ALL {fieldLabel}</option>
+
             {options.map((option)=>{
-                return <option value={option}>{option}</option>
+                return <option selected={option && option[1] ? 
+                    value.includes(option[1].toString()) : false
+                } value={option[1]}>{fieldId == FieldID.UPC ? 
+                    option[1] + " " + option[0]
+                    :
+                    option[0]
+                    }</option>
             })}
         </select>
     )
