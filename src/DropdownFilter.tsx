@@ -13,6 +13,7 @@ interface DropdownFilterProps {
 }
 export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,fieldId, fieldLabel, value, runtimeFilters,setFilter,multiple,height}: DropdownFilterProps) => {
     const [options, setOptions] = useState<any[]>([])
+    console.log("runtimefilters",runtimeFilters)
     useEffect(()=>{
         var url = tsURL+"api/rest/2.0/searchdata"
         fetch(url,
