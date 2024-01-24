@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
 }
 #root, body{
   width:100vw;
@@ -18,4 +19,4 @@ code {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text&family=Lato&family=Open+Sans&family=PT+Sans&display=swap');

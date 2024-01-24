@@ -276,7 +276,7 @@ export const Filters: React.FC<FilterProps> = ({tsURL}:FilterProps) => {
                         <div className={"flex w-full flex-row font-bold align-center"}>
                              <div className="w-2/3">Choose Time Frame</div>
                              <div className="flex w-1/3 justify-end font-2xl">
-                             <DateRangeFilter value={manualDateRange} onChange={manualDateChange} clearDateRange={()=>setUsingManualDates(false)} />
+                             <DateRangeFilter  usingManualDates={usingManualDates} value={manualDateRange} onChange={manualDateChange} clearDateRange={()=>setUsingManualDates(false)} />
                              </div>
                              
                         </div>
@@ -564,8 +564,8 @@ const CopyPasteButton: React.FC<CopyPasteButtonProps> = ({onSubmit, field}:CopyP
 
     }
     return (
-        <>
-            <HiPencil onClick={() => setPopupVisible(!popupVisible)}></HiPencil>
+        <div className="h-full flex items-center mr-3">
+            <HiPencil className="text-slate-500 hover:cursor-pointer hover:text-blue-500" onClick={() => setPopupVisible(!popupVisible)}></HiPencil>
             {popupVisible && (
                 
             <div className="absolute w-96 flex flex-col shadow-2xl border-1 border-slate-600 bg-slate-200 rounded-lg font-normal p-4 space-y-4">
@@ -578,7 +578,7 @@ const CopyPasteButton: React.FC<CopyPasteButtonProps> = ({onSubmit, field}:CopyP
             </div>
             
             )}
-        </>
+        </div>
     )
 }
 interface RollUpButtonProps {
@@ -587,8 +587,8 @@ interface RollUpButtonProps {
 const RollUpButton: React.FC<RollUpButtonProps> = ({onChange}:RollUpButtonProps )=> {
     return (
         <>
-            <div className="mr-2 font-normal">Roll Up</div>
             <input onChange={onChange} type="checkbox"></input>
+            <div className="ml-2 font-normal">Roll Up</div>
         </>
     )
 }
@@ -598,7 +598,7 @@ interface IncludeExcludeButtonProps {
 }
 const IncludeExcludeButton: React.FC<IncludeExcludeButtonProps> = ({value, setValue}:IncludeExcludeButtonProps )=> {
     return (
-        <div onClick={()=>setValue(!value)} className="ml-2 flex">
+        <div onClick={()=>setValue(!value)} className="ml-2 h-full items-center flex">
             {value ? 
             <div className="text-red-400 hover:text-red-500">
             <HiMinusCircle className="hover:cursor-pointer hover:text-blue-500"></HiMinusCircle> 

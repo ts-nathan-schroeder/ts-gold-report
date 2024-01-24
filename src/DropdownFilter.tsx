@@ -13,7 +13,6 @@ interface DropdownFilterProps {
 }
 export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,fieldId, fieldLabel, value, runtimeFilters,setFilter,multiple,height}: DropdownFilterProps) => {
     const [options, setOptions] = useState<any[]>([])
-    console.log("runtimefilters",runtimeFilters)
     useEffect(()=>{
         var url = tsURL+"api/rest/2.0/searchdata"
         fetch(url,
@@ -38,12 +37,11 @@ export const DropdownFilter: React.FC<DropdownFilterProps> = ({tsURL,field,field
             for (var dataRow of filterData){
                 optionsCopy.push(dataRow);
             }
-            console.log(optionsCopy)
             setOptions(optionsCopy)
         })
     },[])
     return (
-        <select className={height} style={{width:"100%"}} onChange={(e) => {
+        <select className={height + " text-gray-800"} style={{width:"100%"}} onChange={(e) => {
             if (multiple){
                 let filterVals = Array.from(e.target.selectedOptions).map((option) => {return option.value})
                 if (filterVals.includes("ALL")){
